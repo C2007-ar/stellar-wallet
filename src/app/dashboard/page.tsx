@@ -87,7 +87,7 @@ export default function DashboardPage() {
               Soldes custodial
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {wallet.balances.map((b) => (
+              {wallet.balances.map((b: { asset: string; balance: string }) => (
                 <BalanceCard key={b.asset} balance={b} />
               ))}
             </div>
