@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import type { TransferPayload } from "/home/carmel/stellar-wallet/src/types";
+import type { TransferPayload } from "@/types/index";
 
 export function useTransfer() {
   const [loading, setLoading] = useState(false);
