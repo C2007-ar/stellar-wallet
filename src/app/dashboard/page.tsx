@@ -42,7 +42,7 @@ export default function DashboardPage() {
             SMARTMINDS
           </span>
         </div>
-        <div className="flex items-center gap-4 w-1/4 mr-10 md:w-1/2 md:ml-auto">
+        <div className="flex items-center gap-4 w-1/4 mr-10 md:w-1/2 md:mx-auto">
           <span className="text-sm text-slate-400 hidden md:block">{user.email}</span>
           <Button variant="secondary" onClick={logout}>
             Déconnexion
