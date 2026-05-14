@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { SESSION_OPTIONS, SessionData } from "@/lib/auth/session";
