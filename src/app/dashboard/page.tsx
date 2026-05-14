@@ -36,8 +36,8 @@ export default function DashboardPage() {
 
       {/* Header */}
       <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex gap-3 w-3/4 md:w-1/2">
-          <span className="font-bold text-slate-100 w-1/3 md:w-2/3 ">Diaspora Connect Wallet</span>
+        <div className="flex gap-3 w-3/4 md:w-1/3">
+          <span className="font-bold text-slate-100 w-1/3 md:w-1/2 ">Diaspora Connect Wallet</span>
           <span className="text-xs font-mono text-amber-400 py-8 px-0.5 md:py-0.5">
             SMARTMINDS
           </span>
