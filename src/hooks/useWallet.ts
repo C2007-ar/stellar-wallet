@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import type { WalletInfo } from "/home/carmel/stellar-wallet/src/types";
+import type { WalletInfo } from "@/types/index";
 
 export function useWallet() {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
