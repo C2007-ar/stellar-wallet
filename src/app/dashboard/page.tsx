@@ -6,6 +6,7 @@ import { TxHistory } from "@/components/wallet/TxHistory";
 import { TransferForm } from "@/components/transfer/TransferForm";
 import { FreighterCard } from "@/components/wallet/FreighterCard";
 import { Button } from "@/components/ui/Button";
+import type { WalletBalance } from "@/types";
 
 export default function DashboardPage() {
   const { user, loading: sessionLoading, logout } = useSession();
@@ -87,9 +88,9 @@ export default function DashboardPage() {
               Soldes custodial
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {wallet.balances.map((b: { asset: string; balance: string }) => (
-                <BalanceCard key={b.asset} balance={b} />
-              ))}
+              {wallet.balances.map((b: WalletBalance) => (
+  <BalanceCard key={b.asset} balance={b} />
+))}
             </div>
           </div>
         )}
