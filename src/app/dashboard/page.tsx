@@ -45,7 +45,7 @@ export default function DashboardPage() {
             TESTNET
           </span>
         </div>
-        <div className="flex items-center gap-4 w-1/4 mr-2 md:flex">
+        <div className="flex items-center gap-4 w-1/4 mr-2">
           <span className="text-sm text-slate-400 hidden">{user.email}</span>
           <Button variant="secondary" onClick={logout}>
             Déconnexion
