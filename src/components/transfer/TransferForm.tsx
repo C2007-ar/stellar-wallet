@@ -143,7 +143,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       />
 
       <div className="flex gap-3">
-        <div className="flex-1">
+        <div className="flex-1 w-1/2">
           <Input
             label="Montant"
             placeholder="0.00"
