@@ -43,7 +43,7 @@ export default function DashboardPage() {
           </span>
         </div>
         <div className="flex items-center gap-4 w-1/4 mr-10 md:w-1/2">
-          <span className="text-sm text-slate-400 hidden md:block">{user.email}</span>
+          <span className="text-sm text-slate-400 hidden md:block md:align-right">{user.email}</span>
           <Button variant="secondary" onClick={logout}>
             Déconnexion
           </Button>
