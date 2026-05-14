@@ -36,7 +36,7 @@ export default function DashboardPage() {
 
       {/* Header */}
       <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-3/4">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center">
             <span className="text-white text-sm">✦</span>
           </div>
@@ -45,8 +45,8 @@ export default function DashboardPage() {
             TESTNET
           </span>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-slate-400">{user.email}</span>
+        <div className="flex items-center gap-4 w-1/4 mr-2 md:flex">
+          <span className="text-sm text-slate-400 hidden">{user.email}</span>
           <Button variant="secondary" onClick={logout}>
             Déconnexion
           </Button>
@@ -58,7 +58,7 @@ export default function DashboardPage() {
         {/* Adresse publique custodial */}
         {wallet && (
           <div className="bg-slate-800 border border-slate-700 rounded-xl px-5 py-4 flex items-center justify-between gap-4">
-            <div>
+            <div className="w-2/3">
               <p className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">
                 Adresse custodial
               </p>
