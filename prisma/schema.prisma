@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  wallet       Wallet?
+  sent         Transaction[] @relation("sender")
+  received     Transaction[] @relation("receiver")
+}
+
+model Wallet {
+  id              String     @id @default(cuid())
+  userId          String     @unique
+  user            User       @relation(fields: [userId], references: [id])
+  publicKey       String     @unique
+  encryptedSecret String
+  secretIv        String
+  secretTag       String
+  walletType      WalletType @default(CUSTODIAL)
+  createdAt       DateTime   @default(now())
+}
+
+model Transaction {
+  id         String   @id @default(cuid())
+  txHash     String   @unique
+  senderId   String
+  receiverId String?
+  sender     User     @relation("sender", fields: [senderId], references: [id])
+  receiver   User?    @relation("receiver", fields: [receiverId], references: [id])
+  toAddress  String
+  amount     String
+  asset      String   @default("XLM")
+  memo       String?
+  status     TxStatus @default(PENDING)
+  createdAt  DateTime @default(now())
+}
+
+enum WalletType {
+  CUSTODIAL
+  NON_CUSTODIAL
+}
+
+enum TxStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}

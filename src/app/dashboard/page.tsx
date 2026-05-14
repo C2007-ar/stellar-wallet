@@ -1,0 +1,120 @@
+"use client";
+import { useSession } from "@/hooks/useSession";
+import { useWallet } from "@/hooks/useWallet";
+import { BalanceCard } from "@/components/wallet/BalanceCard";
+import { TxHistory } from "@/components/wallet/TxHistory";
+import { TransferForm } from "@/components/transfer/TransferForm";
+import { FreighterCard } from "@/components/wallet/FreighterCard";
+import { Button } from "@/components/ui/Button";
+
+export default function DashboardPage() {
+  const { user, loading: sessionLoading, logout } = useSession();
+  const { wallet, loading: walletLoading, refetch } = useWallet();
+
+  if (sessionLoading || walletLoading) {
+    return (
+      <main className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <svg className="animate-spin h-8 w-8 text-sky-400" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          </svg>
+          <p className="text-sm text-slate-400">Chargement du wallet...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!user) {
+    if (typeof window !== "undefined") window.location.href = "/auth";
+    return null;
+  }
+
+  return (
+    <main className="min-h-screen bg-slate-900 text-slate-100">
+
+      {/* Header */}
+      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center">
+            <span className="text-white text-sm">✦</span>
+          </div>
+          <span className="font-bold text-slate-100">Stellar Wallet</span>
+          <span className="text-xs font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full px-2 py-0.5">
+            TESTNET
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-slate-400">{user.email}</span>
+          <Button variant="secondary" onClick={logout}>
+            Déconnexion
+          </Button>
+        </div>
+      </header>
+
+      <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-8">
+
+        {/* Adresse publique custodial */}
+        {wallet && (
+          <div className="bg-slate-800 border border-slate-700 rounded-xl px-5 py-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">
+                Adresse custodial
+              </p>
+              <p className="text-sm font-mono text-sky-400 truncate">{wallet.publicKey}</p>
+            </div>
+            <Button
+              variant="secondary"
+              onClick={() => navigator.clipboard.writeText(wallet.publicKey)}
+            >
+              Copier
+            </Button>
+          </div>
+        )}
+
+        {/* Freighter */}
+        <div>
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            Wallet non-custodial
+          </h2>
+          <FreighterCard />
+        </div>
+
+        {/* Soldes custodial */}
+        {wallet && (
+          <div>
+            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+              Soldes custodial
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {wallet.balances.map((b) => (
+                <BalanceCard key={b.asset} balance={b} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Contenu principal */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+              Nouveau transfert
+            </h2>
+            <TransferForm onSuccess={() => refetch()} />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+              Historique
+            </h2>
+            {wallet ? (
+              <TxHistory history={wallet.history} publicKey={wallet.publicKey} />
+            ) : (
+              <p className="text-sm text-slate-400">Aucune donnée</p>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </main>
+  );
+}
