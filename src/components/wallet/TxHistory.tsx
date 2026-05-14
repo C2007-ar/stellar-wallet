@@ -1,4 +1,4 @@
-import type { PaymentRecord } from "/home/carmel/stellar-wallet/src/types";
+import type { PaymentRecord } from "@/types/index";
 
 interface TxHistoryProps {
   history: PaymentRecord[];
