@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import type { SessionUser } from "/home/carmel/stellar-wallet/src/types";
+import type { SessionUser } from "@/types/index";
 
 export function useSession() {
   const [user, setUser] = useState<SessionUser | null>(null);
