@@ -24,45 +24,45 @@ export function useFreighter() {
   }, []);
 
   const checkFreighter = async () => {
-  try {
-    const result = await freighterApi.isConnected();
-    const connected = (result as any).isConnected ?? (result as any).isAppConnected ?? false;
-    if (!connected) {
+    try {
+      const result = await freighterApi.isConnected();
+      const connected = (result as any).isConnected ?? false;
+      if (!connected) {
+        setState((s) => ({ ...s, isInstalled: false, loading: false }));
+        return;
+      }
+      setState((s) => ({ ...s, isInstalled: true }));
+      const addressResult = await freighterApi.getAddress();
+      const publicKey = addressResult.address;
+      const error = (addressResult as any).error;
+      if (publicKey && !error) {
+        setState((s) => ({
+          ...s,
+          isConnected: true,
+          publicKey,
+          loading: false,
+        }));
+      } else {
+        setState((s) => ({ ...s, isConnected: false, loading: false }));
+      }
+    } catch (e: any) {
       setState((s) => ({ ...s, isInstalled: false, loading: false }));
-      return;
     }
-    setState((s) => ({ ...s, isInstalled: true }));
-    const pkResult = await freighterApi.getPublicKey();
-    const publicKey = (pkResult as any).publicKey ?? pkResult;
-    const error = (pkResult as any).error;
-    if (publicKey && !error) {
-      setState((s) => ({
-        ...s,
-        isConnected: true,
-        publicKey,
-        loading: false,
-      }));
-    } else {
-      setState((s) => ({ ...s, isConnected: false, loading: false }));
-    }
-  } catch (e: any) {
-    setState((s) => ({ ...s, isInstalled: false, loading: false }));
-  }
-};
+  };
 
   const connect = async () => {
     try {
       setState((s) => ({ ...s, loading: true, error: null }));
-      const { publicKey, error } = await freighterApi.requestAccess();
-      if (error) throw new Error(error);
+      const { address, error } = await freighterApi.requestAccess();
+      if (error) throw new Error(String(error));
       setState((s) => ({
         ...s,
         isInstalled: true,
         isConnected: true,
-        publicKey,
+        publicKey: address,
         loading: false,
       }));
-      return publicKey;
+      return address;
     } catch (e: any) {
       setState((s) => ({ ...s, error: e.message, loading: false }));
       return null;
@@ -103,10 +103,15 @@ export function useFreighter() {
           ? "PUBLIC"
           : "TESTNET";
 
-      const { signedXDR, error: signError } = await freighterApi.signTransaction(xdr, {
-        network,
+      const signResult = await freighterApi.signTransaction(xdr, {
+        networkPassphrase: network === "PUBLIC"
+          ? "Public Global Stellar Network ; September 2015"
+          : "Test SDF Network ; September 2015",
       });
-      if (signError) throw new Error(signError);
+
+      const signedXDR = (signResult as any).signedTxXdr ?? (signResult as any).signedXDR;
+      const signError = (signResult as any).error;
+      if (signError) throw new Error(String(signError));
 
       const submitRes = await fetch("/api/transfer/freighter/submit", {
         method: "POST",
