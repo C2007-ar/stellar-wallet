@@ -226,7 +226,7 @@ export default function LandingPage() {
       {/* CTA Final */}
       <section className="max-w-5xl mx-auto px-6 py-20 text-center flex flex-col items-center gap-6">
         <h2 className="text-3xl font-bold">
-          Prêt à envoyer votre premier transfert ?
+          Prêt à faire votre premier transfert ?
         </h2>
         <p className="text-slate-400 max-w-xl">
           Créez votre wallet en moins de 2 minutes et commencez à envoyer
