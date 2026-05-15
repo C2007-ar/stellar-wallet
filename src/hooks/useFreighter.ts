@@ -24,28 +24,31 @@ export function useFreighter() {
   }, []);
 
   const checkFreighter = async () => {
-    try {
-      const { isAppConnected } = await freighterApi.isConnected();
-      if (!isAppConnected) {
-        setState((s) => ({ ...s, isInstalled: false, loading: false }));
-        return;
-      }
-      setState((s) => ({ ...s, isInstalled: true }));
-      const { publicKey, error } = await freighterApi.getPublicKey();
-      if (publicKey && !error) {
-        setState((s) => ({
-          ...s,
-          isConnected: true,
-          publicKey,
-          loading: false,
-        }));
-      } else {
-        setState((s) => ({ ...s, isConnected: false, loading: false }));
-      }
-    } catch (e: any) {
+  try {
+    const result = await freighterApi.isConnected();
+    const connected = (result as any).isConnected ?? (result as any).isAppConnected ?? false;
+    if (!connected) {
       setState((s) => ({ ...s, isInstalled: false, loading: false }));
+      return;
     }
-  };
+    setState((s) => ({ ...s, isInstalled: true }));
+    const pkResult = await freighterApi.getPublicKey();
+    const publicKey = (pkResult as any).publicKey ?? pkResult;
+    const error = (pkResult as any).error;
+    if (publicKey && !error) {
+      setState((s) => ({
+        ...s,
+        isConnected: true,
+        publicKey,
+        loading: false,
+      }));
+    } else {
+      setState((s) => ({ ...s, isConnected: false, loading: false }));
+    }
+  } catch (e: any) {
+    setState((s) => ({ ...s, isInstalled: false, loading: false }));
+  }
+};
 
   const connect = async () => {
     try {
