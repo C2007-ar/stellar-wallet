@@ -36,19 +36,22 @@ export default function DashboardPage() {
 
       {/* Header */}
       <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex gap-3 w-3/4 md:w-1/2">
-          <span className="font-bold text-slate-100 w-1/3 md:w-1/2 md:align-right">Diaspora Connect Wallet</span>
-          <span className="text-xs font-mono text-amber-400 py-8 px-0.5 md:py-0.5">
-            SMARTMINDS
-          </span>
-        </div>
-        <div className="flex items-center gap-4 w-1/4 mr-10 md:w-1/2">
-          <span className="text-sm text-slate-400 hidden md:block md:align-right">{user.email}</span>
-          <Button variant="secondary" onClick={logout}>
-            Déconnexion
-          </Button>
-        </div>
-      </header>
+  <div className="flex items-center gap-3">
+    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center">
+      <span className="text-white text-sm">✦</span>
+    </div>
+    <span className="font-bold text-slate-100">Diaspora Connect</span>
+    <span className="text-xs font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full px-2 py-0.5">
+      SMARTMINDS
+    </span>
+  </div>
+  <div className="flex items-center gap-4">
+    <span className="text-sm text-slate-400 hidden md:block">{user.email}</span>
+    <Button variant="secondary" onClick={logout}>
+      Déconnexion
+    </Button>
+  </div>
+</header>
 
       <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-8">
 
