@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DemoLoginButton } from "@/components/DemoLoginButton";
 
 const DEMO_ACCOUNTS = [
   {
@@ -51,7 +52,8 @@ export default function LandingPage() {
 
         <p className="text-lg text-slate-400 max-w-2xl leading-relaxed">
           Diaspora Connect vous permet d'envoyer des fonds vers vos proches
-          en quelques secondes, avec des frais inférieurs à <span className="text-sky-400 font-semibold">0.00002 USD</span> par transfert —
+          en quelques secondes, avec des frais inférieurs à{" "}
+          <span className="text-sky-400 font-semibold">0.00002 USD</span> par transfert —
           contre 5 à 45 USD via les canaux traditionnels.
         </p>
 
@@ -187,8 +189,8 @@ export default function LandingPage() {
             Testez la plateforme gratuitement
           </h2>
           <p className="text-slate-400 text-center mb-10 max-w-xl mx-auto">
-            Utilisez l'un de nos comptes de démonstration pour explorer toutes les fonctionnalités
-            de Diaspora Connect sans créer de compte.
+            Utilisez l'un de nos comptes de démonstration pour explorer toutes les
+            fonctionnalités de Diaspora Connect sans créer de compte.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {DEMO_ACCOUNTS.map((account) => (
@@ -214,12 +216,7 @@ export default function LandingPage() {
                     <span className="text-xs font-mono text-sky-400">{account.password}</span>
                   </div>
                 </div>
-                <Link
-                  href="/auth"
-                  className="bg-sky-500 hover:bg-sky-400 text-white text-sm font-medium px-4 py-2 rounded-lg transition-all text-center"
-                >
-                  Se connecter avec ce compte
-                </Link>
+                <DemoLoginButton email={account.email} password={account.password} />
               </div>
             ))}
           </div>
