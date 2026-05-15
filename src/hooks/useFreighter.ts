@@ -1,11 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import {
-  isConnected,
-  getPublicKey,
-  requestAccess,
-  signTransaction,
-} from "@stellar/freighter-api";
+import freighterApi from "@stellar/freighter-api";
 
 interface FreighterState {
   isInstalled: boolean;
@@ -30,13 +25,13 @@ export function useFreighter() {
 
   const checkFreighter = async () => {
     try {
-      const { isAppConnected } = await isConnected();
+      const { isAppConnected } = await freighterApi.isConnected();
       if (!isAppConnected) {
         setState((s) => ({ ...s, isInstalled: false, loading: false }));
         return;
       }
       setState((s) => ({ ...s, isInstalled: true }));
-      const { publicKey, error } = await getPublicKey();
+      const { publicKey, error } = await freighterApi.getPublicKey();
       if (publicKey && !error) {
         setState((s) => ({
           ...s,
@@ -55,7 +50,7 @@ export function useFreighter() {
   const connect = async () => {
     try {
       setState((s) => ({ ...s, loading: true, error: null }));
-      const { publicKey, error } = await requestAccess();
+      const { publicKey, error } = await freighterApi.requestAccess();
       if (error) throw new Error(error);
       setState((s) => ({
         ...s,
@@ -105,7 +100,7 @@ export function useFreighter() {
           ? "PUBLIC"
           : "TESTNET";
 
-      const { signedXDR, error: signError } = await signTransaction(xdr, {
+      const { signedXDR, error: signError } = await freighterApi.signTransaction(xdr, {
         network,
       });
       if (signError) throw new Error(signError);
