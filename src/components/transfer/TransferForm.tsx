@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Ajout de useEffect
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useTransfer } from "@/hooks/useTransfer";
@@ -17,6 +17,8 @@ type WalletMode = "custodial" | "freighter";
 export function TransferForm({ onSuccess }: TransferFormProps) {
   const { transfer, loading: custodialLoading, error: custodialError, txHash, reset } = useTransfer();
   const { rates } = useRates();
+  
+  // On récupère "connect" si ton hook le permet, sinon on utilise isConnected
   const { isConnected, publicKey, signAndSubmit, loading: freighterLoading, error: freighterError } = useFreighter();
 
   const [walletMode, setWalletMode] = useState<WalletMode>("custodial");
@@ -26,6 +28,14 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
     currency: "XLM" as Currency,
     memo: "",
   });
+
+  // --- AMÉLIORATION : DÉTECTION AUTOMATIQUE ---
+  useEffect(() => {
+    if (isConnected) {
+      setWalletMode("freighter");
+    }
+  }, [isConnected]);
+  // --------------------------------------------
 
   const loading = walletMode === "custodial" ? custodialLoading : freighterLoading;
   const error = walletMode === "custodial" ? custodialError : freighterError;
@@ -112,6 +122,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         </label>
         <div className="flex bg-slate-900 rounded-lg p-1 gap-1">
           <button
+            type="button"
             className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${
               walletMode === "custodial"
                 ? "bg-slate-700 text-slate-100"
@@ -122,17 +133,25 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
             Custodial
           </button>
           <button
+            type="button"
             className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${
               walletMode === "freighter"
                 ? "bg-indigo-600 text-white"
                 : "text-slate-400 hover:text-slate-200"
-            } ${!isConnected ? "opacity-50 cursor-not-allowed" : ""}`}
-            onClick={() => isConnected && setWalletMode("freighter")}
-            disabled={!isConnected}
+            }`}
+            // AMÉLIORATION : On permet le clic même si isConnected est faux au début 
+            // pour forcer la demande de connexion si le hook ne l'a pas fait
+            onClick={() => setWalletMode("freighter")}
           >
-            Freighter {!isConnected && "(non connecté)"}
+            Freighter {!isConnected && "(Détection...)"}
           </button>
         </div>
+        {/* Petit indicateur d'adresse si connecté */}
+        {isConnected && publicKey && walletMode === "freighter" && (
+          <span className="text-[10px] text-indigo-400 font-mono mt-1">
+            Connecté: {publicKey.slice(0, 4)}...{publicKey.slice(-4)}
+          </span>
+        )}
       </div>
 
       <Input
@@ -143,7 +162,7 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
       />
 
       <div className="flex gap-3">
-        <div className="flex-1">
+        <div className="flex-1 w-1/2">
           <Input
             label="Montant"
             placeholder="0.00"
@@ -196,7 +215,12 @@ export function TransferForm({ onSuccess }: TransferFormProps) {
         </p>
       )}
 
-      <Button onClick={handleSubmit} isLoading={loading}>
+      <Button 
+        onClick={handleSubmit} 
+        isLoading={loading}
+        // Désactivé uniquement si on est en mode freighter ET que vraiment aucune clé n'est là
+        disabled={walletMode === "freighter" && !publicKey}
+      >
         {isFiat
           ? `Envoyer ${form.amount || "0"} ${form.currency} en XLM`
           : `Envoyer ${form.currency}`}

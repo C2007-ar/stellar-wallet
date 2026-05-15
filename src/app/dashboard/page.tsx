@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import { useSession } from "@/hooks/useSession";
 import { useWallet } from "@/hooks/useWallet";
 import { BalanceCard } from "@/components/wallet/BalanceCard";
@@ -6,11 +7,29 @@ import { TxHistory } from "@/components/wallet/TxHistory";
 import { TransferForm } from "@/components/transfer/TransferForm";
 import { FreighterCard } from "@/components/wallet/FreighterCard";
 import { Button } from "@/components/ui/Button";
+import { useFreighter } from "@/hooks/useFreighter"; // Import du hook amélioré
 import type { WalletBalance } from "@/types";
 
 export default function DashboardPage() {
   const { user, loading: sessionLoading, logout } = useSession();
   const { wallet, loading: walletLoading, refetch } = useWallet();
+  
+  // Utilisation des nouveaux états du hook useFreighter
+  const { isInstalled, isConnected, loading: freighterLoading, publicKey: freighterKey } = useFreighter();
+  const [copied, setCopied] = useState(false);
+
+  // Redirection si non connecté
+  useEffect(() => {
+    if (!sessionLoading && !user) {
+      window.location.href = "/auth";
+    }
+  }, [user, sessionLoading]);
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (sessionLoading || walletLoading) {
     return (
@@ -20,33 +39,27 @@ export default function DashboardPage() {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
           </svg>
-          <p className="text-sm text-slate-400">Chargement du wallet...</p>
+          <p className="text-sm text-slate-400">Chargement du wallet Diaspora Connect...</p>
         </div>
       </main>
     );
   }
 
-  if (!user) {
-    if (typeof window !== "undefined") window.location.href = "/auth";
-    return null;
-  }
+  if (!user) return null;
 
   return (
     <main className="min-h-screen bg-slate-900 text-slate-100">
 
       {/* Header */}
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center">
-            <span className="text-white text-sm">✦</span>
-          </div>
-          <span className="font-bold text-slate-100">Stellar Wallet</span>
-          <span className="text-xs font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full px-2 py-0.5">
-            TESTNET
+      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 bg-slate-900/90 backdrop-blur-sm z-20">
+        <div className="flex gap-3 w-3/4 md:w-1/2">
+          <span className="font-bold text-slate-100 w-1/3 md:w-1/2 md:align-right">Diaspora Connect Wallet</span>
+          <span className="text-xs font-mono text-amber-400 py-8 px-0.5 md:py-0.5">
+            SMARTMINDS
           </span>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-slate-400">{user.email}</span>
+        <div className="flex items-center gap-4 w-1/4 mr-10 md:w-1/2">
+          <span className="text-sm text-slate-400 hidden md:block md:align-right truncate max-w-[150px]">{user.email}</span>
           <Button variant="secondary" onClick={logout}>
             Déconnexion
           </Button>
@@ -58,39 +71,54 @@ export default function DashboardPage() {
         {/* Adresse publique custodial */}
         {wallet && (
           <div className="bg-slate-800 border border-slate-700 rounded-xl px-5 py-4 flex items-center justify-between gap-4">
-            <div>
+            <div className="w-2/3">
               <p className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">
-                Adresse custodial
+                Adresse Publique (Interne)
               </p>
               <p className="text-sm font-mono text-sky-400 truncate">{wallet.publicKey}</p>
             </div>
             <Button
               variant="secondary"
-              onClick={() => navigator.clipboard.writeText(wallet.publicKey)}
+              onClick={() => handleCopy(wallet.publicKey)}
             >
-              Copier
+              {copied ? "Copié !" : "Copier"}
             </Button>
           </div>
         )}
 
-        {/* Freighter */}
-        <div>
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
-            Wallet non-custodial
-          </h2>
-          <FreighterCard />
-        </div>
+        {/* SECTION FREIGHTER : Masquée si déjà installé */}
+        {!freighterLoading && !isInstalled && (
+          <div>
+            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+              Installer un Wallet Externe
+            </h2>
+            <FreighterCard />
+          </div>
+        )}
+
+        {/* Indicateur de connexion Freighter si actif */}
+        {isInstalled && isConnected && (
+          <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-5 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <p className="text-xs font-medium text-indigo-300 uppercase tracking-wider">Extension Freighter Active</p>
+            </div>
+            <p className="text-[10px] font-mono text-slate-500 truncate max-w-[150px] sm:max-w-none">
+              {freighterKey}
+            </p>
+          </div>
+        )}
 
         {/* Soldes custodial */}
         {wallet && (
           <div>
             <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
-              Soldes custodial
+              Soldes
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {wallet.balances.map((b: WalletBalance) => (
-  <BalanceCard key={b.asset} balance={b} />
-))}
+                <BalanceCard key={b.asset} balance={b} />
+              ))}
             </div>
           </div>
         )}

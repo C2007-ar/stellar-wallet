@@ -1,5 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
+import {
+  isConnected,
+  getPublicKey,
+  requestAccess,
+  signTransaction,
+} from "@stellar/freighter-api";
 
 interface FreighterState {
   isInstalled: boolean;
@@ -24,15 +30,14 @@ export function useFreighter() {
 
   const checkFreighter = async () => {
     try {
-      const freighter = (window as any).freighter;
-      if (!freighter) {
+      const { isAppConnected } = await isConnected();
+      if (!isAppConnected) {
         setState((s) => ({ ...s, isInstalled: false, loading: false }));
         return;
       }
       setState((s) => ({ ...s, isInstalled: true }));
-      const isConnected = await freighter.isConnected();
-      if (isConnected) {
-        const { publicKey } = await freighter.getPublicKey();
+      const { publicKey, error } = await getPublicKey();
+      if (publicKey && !error) {
         setState((s) => ({
           ...s,
           isConnected: true,
@@ -43,19 +48,18 @@ export function useFreighter() {
         setState((s) => ({ ...s, isConnected: false, loading: false }));
       }
     } catch (e: any) {
-      setState((s) => ({ ...s, error: e.message, loading: false }));
+      setState((s) => ({ ...s, isInstalled: false, loading: false }));
     }
   };
 
   const connect = async () => {
     try {
       setState((s) => ({ ...s, loading: true, error: null }));
-      const freighter = (window as any).freighter;
-      if (!freighter) throw new Error("Freighter non installé");
-      await freighter.requestAccess();
-      const { publicKey } = await freighter.getPublicKey();
+      const { publicKey, error } = await requestAccess();
+      if (error) throw new Error(error);
       setState((s) => ({
         ...s,
+        isInstalled: true,
         isConnected: true,
         publicKey,
         loading: false,
@@ -81,7 +85,6 @@ export function useFreighter() {
     try {
       if (!state.publicKey) throw new Error("Freighter non connecté");
 
-      // 1. Construit la transaction XDR côté serveur
       const buildRes = await fetch("/api/transfer/freighter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -97,16 +100,16 @@ export function useFreighter() {
       const { xdr, error } = await buildRes.json();
       if (error) throw new Error(error);
 
-      // 2. Signe avec Freighter côté client
-      const freighter = (window as any).freighter;
-      const { signedXDR } = await freighter.signTransaction(xdr, {
-        network:
-          process.env.NEXT_PUBLIC_STELLAR_NETWORK === "mainnet"
-            ? "PUBLIC"
-            : "TESTNET",
-      });
+      const network =
+        process.env.NEXT_PUBLIC_STELLAR_NETWORK === "mainnet"
+          ? "PUBLIC"
+          : "TESTNET";
 
-      // 3. Soumet la transaction signée
+      const { signedXDR, error: signError } = await signTransaction(xdr, {
+        network,
+      });
+      if (signError) throw new Error(signError);
+
       const submitRes = await fetch("/api/transfer/freighter/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
